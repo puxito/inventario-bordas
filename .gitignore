@@ -1,0 +1,26 @@
+# Node.js y dependencias si decides usar Node en el futuro
+node_modules/
+npm-debug.log*
+
+# Configuración de entorno
+.env
+.env.local
+.env.*.local
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Volúmenes y bases de datos de Docker
+backend/docker/db_data/
+backend/docker/*.log
+
+# Configuración de IDE y editores
+.vscode/
+.idea/
+*.swp
+
+# Otros
+logs/
+*.log
+*.tmp

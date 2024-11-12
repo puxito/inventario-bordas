@@ -29,6 +29,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['insertComputer'])) {
 
     insertComputer($nexp, $model, $cpu, $ram, $motherboard, $storage, $so, $license, $ip, $mac, $pcname, $netuser);
 }
+
+// Obtener la lista de usuarios para el desplegable
+$users = getUsers();
 ?>
 
 <!DOCTYPE html>
@@ -105,7 +108,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['insertComputer'])) {
         <input type="text" id="pcname" name="pcname" required>
         
         <label for="netuser">Net User (Username):</label>
-        <input type="text" id="netuser" name="netuser" required>
+        <select id="netuser" name="netuser" required>
+            <option value="" disabled selected>Seleccionar Usuario</option>
+            <?php foreach ($users as $user): ?>
+                <option value="<?= htmlspecialchars($user) ?>"><?= htmlspecialchars($user) ?></option>
+            <?php endforeach; ?>
+        </select>
         
         <button type="submit" name="insertComputer">Insertar Equipo</button>
     </form>

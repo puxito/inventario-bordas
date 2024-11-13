@@ -22,6 +22,7 @@
         body {
             color: #333;
             font-family: 'Arial', sans-serif;
+            background-color: #fff6df;
         }
 
         .content {

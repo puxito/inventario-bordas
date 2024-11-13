@@ -15,13 +15,7 @@ function insertUser($username, $realname, $dept)
         }
 
         $stmt->bind_param("sss", $username, $realname, $dept);
-
-        if (!$stmt->execute()) {
-            throw new Exception("Error al insertar el usuario: " . $stmt->error);
-        } else {
-            echo "<p class='success'>Usuario insertado correctamente.</p>";
-        }
-
+        $stmt->execute(); // Ejecutar la consulta
         $stmt->close();
     } catch (Exception $e) {
         echo "<p class='error'>" . $e->getMessage() . "</p>";
@@ -46,13 +40,7 @@ function insertComputer($nexp, $model, $cpu, $ram, $motherboard, $storage, $so, 
         }
 
         $stmt->bind_param("issisissssss", $nexp, $model, $cpu, $ram, $motherboard, $storage, $so, $license, $ip, $mac, $pcname, $netuser);
-
-        if (!$stmt->execute()) {
-            throw new Exception("Error al insertar el equipo: " . $stmt->error);
-        } else {
-            echo "<p class='success'>Equipo insertado correctamente.</p>";
-        }
-
+        $stmt->execute(); // Ejecutar la consulta
         $stmt->close();
     } catch (Exception $e) {
         echo "<p class='error'>" . $e->getMessage() . "</p>";
@@ -117,11 +105,36 @@ function getComputerDetails($nexp)
     $result = $stmt->get_result();
 
     if ($result && $result->num_rows > 0) {
+        $stmt->close();
         return $result->fetch_assoc(); // Devuelve solo un equipo
     }
 
     $stmt->close();
     return null; // No se encontró el equipo
+}
+
+// Función para obtener los detalles de un usuario por su 'netuser'
+function getUsuarioByNetuser($netuser)
+{
+    global $conn;
+
+    $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
+    if (!$stmt) {
+        throw new Exception("Error preparando la consulta: " . $conn->error);
+    }
+
+    $stmt->bind_param("s", $netuser);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result && $result->num_rows > 0) {
+        $user = $result->fetch_assoc(); // Devuelve solo el usuario
+        $stmt->close();
+        return $user;
+    }
+
+    $stmt->close();
+    return null; // No se encontró el usuario
 }
 
 // Función para actualizar un equipo
@@ -194,6 +207,8 @@ function updateComputer($nexp, $model, $cpu, $ram, $motherboard, $storage, $so, 
             $stmt = $conn->prepare($sql);
             $types = str_repeat("s", count($params) - 1) . "i";
             $stmt->bind_param($types, ...$params);
+            $stmt->execute(); // Ejecutar la consulta
+            $stmt->close();
         }
     } catch (Exception $e) {
         echo "<p class='error'>" . $e->getMessage() . "</p>";
@@ -212,6 +227,13 @@ function deleteComputer($nexp)
         }
 
         $stmt->bind_param("i", $nexp);
+
+        if (!$stmt->execute()) {
+            throw new Exception("Error al eliminar el equipo: " . $stmt->error);
+        } else {
+            echo "<p class='success'>Equipo eliminado correctamente.</p>";
+        }
+
         $stmt->close();
     } catch (Exception $e) {
         echo "<p class='error'>" . $e->getMessage() . "</p>";

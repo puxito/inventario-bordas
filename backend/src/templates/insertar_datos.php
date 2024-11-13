@@ -1,46 +1,35 @@
 <?php
-// equipo_crud.php - Listado de equipos con opciones para ver, editar y eliminar
-
 include('../includes/funciones.php');
 
-// Ordenación
-$order_by = $_GET['order_by'] ?? 'nexp';
-$order_dir = $_GET['order_dir'] ?? 'asc';
-$equipos = getEquipos($order_by, $order_dir);
-$new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
+// Insertar un usuario
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['insertUser'])) {
+    $username = $_POST['username'];
+    $realname = $_POST['realname'];
+    $dept = $_POST['dept'];
 
-// Mensaje de retroalimentación
-$message = '';
-
-// Si se envía el formulario de actualización
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['updateComputer'])) {
-        updateComputer(
-            $_POST['nexp'],
-            $_POST['model'],
-            $_POST['cpu'],
-            $_POST['ram'],
-            $_POST['motherboard'],
-            $_POST['storage'],
-            $_POST['so'],
-            $_POST['license'],
-            $_POST['ip'],
-            $_POST['mac'],
-            $_POST['pcname'],
-            $_POST['netuser']
-        );
-        $message = 'Equipo actualizado correctamente.';
-    } elseif (isset($_POST['deleteComputer'])) {
-        deleteComputer($_POST['nexp']); // Usamos nexp como identificador
-        $message = 'Equipo eliminado correctamente.';
-    }
+    insertUser($username, $realname, $dept);
 }
 
-// Si hay un mensaje, lo almacenamos en sessionStorage
-if ($message) {
-    echo "<script>sessionStorage.setItem('lastMessage', '" . addslashes($message) . "');</script>";
+// Insertar un equipo
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['insertComputer'])) {
+    $nexp = $_POST['nexp'];
+    $model = $_POST['model'];
+    $cpu = $_POST['cpu'];
+    $ram = $_POST['ram'];
+    $motherboard = $_POST['motherboard'];
+    $storage = $_POST['storage'];
+    $so = $_POST['so'];
+    $license = $_POST['license'];
+    $ip = $_POST['ip'];
+    $mac = $_POST['mac'];
+    $pcname = $_POST['pcname'];
+    $netuser = $_POST['netuser'];
+
+    insertComputer($nexp, $model, $cpu, $ram, $motherboard, $storage, $so, $license, $ip, $mac, $pcname, $netuser);
 }
 
+// Obtener la lista de usuarios para el desplegable
+$users = getUsers();
 ?>
 
 <!DOCTYPE html>
@@ -49,76 +38,79 @@ if ($message) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRUD de Equipos</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <title>Formulario de Inserción</title>
+    <link rel="icon" type="image/x-ico" href="../uploads/LOGO-BORDAS-ICO.ico">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
-        /* Responsive and styled with chosen color patterns */
-
         body {
-            background-color: #f4f6f9;
+            color: #800000;
+            background-color: #fff6df;
             font-family: Arial, sans-serif;
+            padding: 30px;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 20px;
-        }
-
+        h1,
         h2 {
+            text-align: center;
             color: #800000;
         }
 
-        .table {
-            border: 1px solid #800000;
+        .form-container {
+            background-color: white;
+            padding: 30px;
             border-radius: 8px;
-        }
-
-        .table th {
-            background-color: #800000;
-            color: #ffffff;
-            cursor: pointer;
-        }
-
-        .table-striped tbody tr:nth-of-type(odd) {
-            background-color: #f2f2f2;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: #d9e2f3;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-        }
-
-        .btn-warning {
-            background-color: #ffca2c;
-            color: #343a40;
-            border: none;
-        }
-
-        .btn-danger {
-            background-color: #e3342f;
-            border: none;
-        }
-
-        .btn-info {
-            background-color: #17a2b8;
-            border: none;
-            color: #ffffff;
-        }
-
-        .collapse {
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            padding: 15px;
-            margin-top: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
         }
 
+        .form-container label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-container input,
+        .form-container select,
+        .form-container button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .form-container button {
+            background-color: #800000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .form-container button:hover {
+            background-color: #a52a2a;
+        }
+
+        .form-container select {
+            background-color: #f9f9f9;
+        }
+
+        .form-container input:focus,
+        .form-container select:focus {
+            border-color: #800000;
+            outline: none;
+        }
+
+
+
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Estilo para el logo flotante en una esquina */
         .logo {
             position: fixed;
             top: 20px;
@@ -129,167 +121,110 @@ if ($message) {
         }
 
         @media (max-width: 768px) {
-            .logo {
-                width: 80px;
+            .form-container {
+                padding: 20px;
             }
-
-            .container {
-                padding: 10px;
-            }
-
-            .table {
-                font-size: 0.9em;
-            }
-
-            .btn {
-                font-size: 0.85em;
-            }
-        }
-
-        /* Mensaje emergente estilizado */
-        #message {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 999;
-            width: auto;
-            max-width: 300px;
-            padding: 15px;
-            font-size: 16px;
-            border-radius: 5px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            transition: opacity 0.5s ease-in-out;
         }
     </style>
 </head>
 
 <body>
-    <!-- Mensaje emergente -->
-    <div id="message" class="alert alert-info d-none" role="alert">
-        Acción realizada correctamente.
-    </div>
-
+    <!-- Logo flotante en la esquina -->
     <a href="../index.php"><img src="../uploads/logo-bordas-FINAL-esp-color - copia.jpg" alt="Logo de la empresa" class="logo"></a>
-    <div class="container mt-4">
-        <h2 class="mb-4 text-center"><b>Listado de Equipos</b></h2>
-        <button id="reload" class="btn btn-info mb-3">Recargar</button>
+        
+    <div class="container">
 
-        <table class="table table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th><a href="?order_by=nexp&order_dir=<?= $new_order_dir ?>" class="text-light">Número de Expediente</a></th>
-                    <th><a href="?order_by=pcname&order_dir=<?= $new_order_dir ?>" class="text-light">Nombre del Equipo</a></th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($equipos as $equipo): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($equipo['nexp'] ?? '') ?></td>
-                        <td><?= htmlspecialchars($equipo['pcname'] ?? '') ?></td>
-                        <td>
-                            <!-- Botón para mostrar detalles y opciones de editar/eliminar -->
-                            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#details-<?= htmlspecialchars($equipo['nexp'] ?? 'unknown') ?>">
-                                Ver detalles
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="3">
-                            <!-- Contenedor colapsable con clase 'collapse' dentro de un td -->
-                            <div id="details-<?= htmlspecialchars($equipo['nexp'] ?? 'unknown') ?>" class="collapse">
-                                <form method="POST" class="border p-4 bg-light rounded shadow-sm">
-                                    <input type="hidden" name="nexp" value="<?= htmlspecialchars($equipo['nexp'] ?? '') ?>">
+        <!-- Formulario para insertar un usuario -->
+        <h2><b>Insertar Usuario</b></h2>
+        <form method="POST" class="form-container">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
 
-                                    <!-- Campos del formulario con clases de Bootstrap -->
-                                    <div class="mb-3">
-                                        <label for="model" class="form-label">Modelo:</label>
-                                        <input type="text" class="form-control" name="model" value="<?= htmlspecialchars($equipo['model'] ?? '') ?>">
-                                    </div>
+            <label for="realname">Real Name:</label>
+            <input type="text" id="realname" name="realname" required>
 
-                                    <div class="mb-3">
-                                        <label for="cpu" class="form-label">CPU:</label>
-                                        <input type="text" class="form-control" name="cpu" value="<?= htmlspecialchars($equipo['cpu'] ?? '') ?>">
-                                    </div>
+            <label for="dept">Department:</label>
+            <select id="dept" name="dept" required>
+                <option value="staff">STAFF</option>
+                <option value="ddf">DDF</option>
+                <option value="f&f">F&F</option>
+                <option value="fla">FLA</option>
+            </select>
 
-                                    <div class="mb-3">
-                                        <label for="ram" class="form-label">RAM:</label>
-                                        <input type="number" class="form-control" name="ram" value="<?= htmlspecialchars($equipo['ram'] ?? '') ?>">
-                                    </div>
+            <button type="submit" name="insertUser">Insertar Usuario</button>
+        </form>
 
-                                    <div class="mb-3">
-                                        <label for="motherboard" class="form-label">Motherboard:</label>
-                                        <input type="text" class="form-control" name="motherboard" value="<?= htmlspecialchars($equipo['motherboard'] ?? '') ?>">
-                                    </div>
+        <!-- Formulario para insertar un equipo -->
+        <h2><b>Insertar Equipo</b></h2>
+        <form method="POST" class="form-container">
+            <label for="nexp">NºEXP:</label>
+            <input type="number" id="nexp" name="nexp" required>
 
-                                    <div class="mb-3">
-                                        <label for="storage" class="form-label">Storage:</label>
-                                        <input type="number" class="form-control" name="storage" value="<?= htmlspecialchars($equipo['storage'] ?? '') ?>">
-                                    </div>
+            <label for="model">Model:</label>
+            <input type="text" id="model" name="model" required>
 
-                                    <div class="mb-3">
-                                        <label for="so" class="form-label">SO:</label>
-                                        <input type="text" class="form-control" name="so" value="<?= htmlspecialchars($equipo['so'] ?? '') ?>">
-                                    </div>
+            <label for="cpu">CPU:</label>
+            <input type="text" id="cpu" name="cpu" required>
 
-                                    <div class="mb-3">
-                                        <label for="license" class="form-label">Licencia:</label>
-                                        <input type="text" class="form-control" name="license" value="<?= htmlspecialchars($equipo['license'] ?? '') ?>">
-                                    </div>
+            <label for="ram">RAM:</label>
+            <input type="number" id="ram" name="ram" required>
 
-                                    <div class="mb-3">
-                                        <label for="ip" class="form-label">IP:</label>
-                                        <input type="text" class="form-control" name="ip" value="<?= htmlspecialchars($equipo['ip'] ?? '') ?>">
-                                    </div>
+            <label for="motherboard">Motherboard:</label>
+            <input type="text" id="motherboard" name="motherboard" required>
 
-                                    <div class="mb-3">
-                                        <label for="mac" class="form-label">MAC:</label>
-                                        <input type="text" class="form-control" name="mac" value="<?= htmlspecialchars($equipo['mac'] ?? '') ?>">
-                                    </div>
+            <label for="storage">Storage:</label>
+            <input type="number" id="storage" name="storage" required>
 
-                                    <div class="mb-3">
-                                        <label for="pcname" class="form-label">Nombre del Equipo:</label>
-                                        <input type="text" class="form-control" name="pcname" value="<?= htmlspecialchars($equipo['pcname'] ?? '') ?>">
-                                    </div>
+            <label for="so">Operating System:</label>
+            <select id="so" name="so" required>
+                <option value="Windows XP">Windows XP</option>
+                <option value="Windows 7">Windows 7</option>
+                <option value="Windows 10">Windows 10</option>
+                <option value="Windows 11">Windows 11</option>
+            </select>
 
-                                    <div class="mb-3">
-                                        <label for="netuser" class="form-label">Usuario de red:</label>
-                                        <input type="text" class="form-control" name="netuser" value="<?= htmlspecialchars($equipo['netuser'] ?? '') ?>">
-                                    </div>
+            <label for="license">License:</label>
+            <input type="text" id="license" name="license" required>
 
-                                    <button type="submit" name="updateComputer" class="btn btn-warning">Actualizar equipo</button>
-                                    <button type="submit" name="deleteComputer" class="btn btn-danger">Eliminar equipo</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
+            <label for="ip">IP Address:</label>
+            <input type="text" id="ip" name="ip" required>
+
+            <label for="mac">MAC Address:</label>
+            <input type="text" id="mac" name="mac" required>
+
+            <label for="pcname">PC Name:</label>
+            <input type="text" id="pcname" name="pcname" required>
+
+            <label for="netuser">Net User (Username):</label>
+            <select id="netuser" name="netuser" required>
+                <option value="" disabled selected>Seleccionar Usuario</option>
+                <?php foreach ($users as $user): ?>
+                    <option value="<?= htmlspecialchars($user) ?>"><?= htmlspecialchars($user) ?></option>
                 <?php endforeach; ?>
-            </tbody>
-        </table>
+            </select>
+
+            <button type="submit" name="insertComputer">Insertar Equipo</button>
+        </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9gybBogGzC7GoouOY1D9HfqF5zsXY1wA03GzHN3k5/u6pD6L6L3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Wn1qWmQNAhD2F3cZ1IRamPpBJoA7Ai1sgFHSk0HsPq4s5p" crossorigin="anonymous"></script>
     <script>
-        document.getElementById("reload").addEventListener("click", function () {
-            // Al hacer clic en recargar, eliminamos el mensaje actual
-            sessionStorage.removeItem('lastMessage');
+        document.getElementById("reload").addEventListener("click", function() {
             location.reload();
         });
 
-        // Mostrar el mensaje almacenado en sessionStorage si existe
-        window.addEventListener('load', function () {
-            const lastMessage = sessionStorage.getItem('lastMessage');
-            if (lastMessage) {
-                const messageElement = document.getElementById("message");
-                messageElement.textContent = lastMessage;
-                messageElement.classList.remove("d-none");
+        // Muestra el mensaje emergente después de una acción
+        <?php if ($message): ?>
+            const messageElement = document.getElementById("message");
+            messageElement.textContent = '<?= $message ?>';
+            messageElement.classList.remove("d-none");
 
-                // Después de 3 segundos, ocultamos el mensaje
-                setTimeout(function () {
-                    messageElement.classList.add("d-none");
-                }, 3000);
-            }
-        });
+            // Después de 3 segundos, ocultamos el mensaje
+            setTimeout(function() {
+                messageElement.classList.add("d-none");
+            }, 3000);
+        <?php endif; ?>
     </script>
 </body>
 

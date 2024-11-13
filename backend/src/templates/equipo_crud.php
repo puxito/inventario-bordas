@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         /* Responsive and styled with chosen color patterns */
 
         body {
-            background-color: #f4f6f9;
+            background-color: #fff6df;
             font-family: Arial, sans-serif;
         }
 
@@ -67,6 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .table {
             border: 1px solid #800000;
             border-radius: 8px;
+        }
+
+        .table img {
+            width: 20px;
         }
 
         .table th {
@@ -184,8 +188,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <td>
                             <!-- Botón para mostrar detalles y opciones de editar/eliminar -->
                             <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#details-<?= htmlspecialchars($equipo['nexp'] ?? 'unknown') ?>">
-                                Ver detalles
+                                <img src="../uploads/pencil.png" alt="Edit">
                             </button>
+                            
+                                <a href="equipo_detalle.php?nexp=<?= urlencode($equipo['nexp']) ?>" class="btn btn-eye">
+                                    <img src="../uploads/eye.png" alt="Details">
+                                </a>
+                            
                         </td>
                     </tr>
                     <tr>

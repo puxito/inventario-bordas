@@ -96,6 +96,7 @@
             <div class="d-flex justify-content-center flex-wrap">
                 <a href="/templates/equipo_crud.php" class="btn btn-custom btn-lg mx-3">Gestionar Equipos</a>
                 <a href="/templates/insertar_datos.php" class="btn btn-custom btn-lg mx-3">Insertar Datos</a>
+                
             </div>
         </div>
     </div>

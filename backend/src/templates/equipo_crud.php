@@ -3,13 +3,19 @@
 
 include('../includes/funciones.php');
 
-$equipos = getEquipos();
+// Ordenación
+$order_by = $_GET['order_by'] ?? 'nexp';
+$order_dir = $_GET['order_dir'] ?? 'asc';
+$equipos = getEquipos($order_by, $order_dir);
+$new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
+
+// Mensaje de retroalimentación
+
 
 // Si se envía el formulario de actualización
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['updateComputer'])) {
         updateComputer(
-
             $_POST['nexp'],
             $_POST['model'],
             $_POST['cpu'],
@@ -23,8 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['pcname'],
             $_POST['netuser']
         );
+        $message = 'Equipo actualizado correctamente.';
     } elseif (isset($_POST['deleteComputer'])) {
         deleteComputer($_POST['nexp']); // Usamos nexp como identificador
+        $message = 'Equipo eliminado correctamente.';
     }
 }
 
@@ -38,9 +46,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRUD de Equipos</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<style>
-    .logo {
+    <style>
+        /* Responsive and styled with chosen color patterns */
+
+        body {
+            background-color: #f4f6f9;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #800000;
+        }
+
+        .table {
+            border: 1px solid #800000;
+            border-radius: 8px;
+        }
+
+        .table th {
+            background-color: #800000;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #d9e2f3;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+
+        .btn-warning {
+            background-color: #ffca2c;
+            color: #343a40;
+            border: none;
+        }
+
+        .btn-danger {
+            background-color: #e3342f;
+            border: none;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            border: none;
+            color: #ffffff;
+        }
+
+        .collapse {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
             position: fixed;
             top: 20px;
             left: 20px;
@@ -48,18 +121,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             height: auto;
             z-index: 1000;
         }
-</style>
+
+        @media (max-width: 768px) {
+            .logo {
+                width: 80px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .table {
+                font-size: 0.9em;
+            }
+
+            .btn {
+                font-size: 0.85em;
+            }
+        }
+
+        /* Mensaje emergente estilizado */
+        #message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+            width: auto;
+            max-width: 300px;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.5s ease-in-out;
+        }
+    </style>
+</head>
+
 <body>
-    <a href="index.php"><img src="../uploads/logo-bordas-FINAL-esp-color - copia.jpg" alt="Logo de la empresa" class="logo"></a>
+    <!-- Mensaje emergente -->
+    <div id="message" class="alert alert-info d-none" role="alert">
+        Acción realizada correctamente.
+    </div>
+
+    <a href="../index.php"><img src="../uploads/logo-bordas-FINAL-esp-color - copia.jpg" alt="Logo de la empresa" class="logo"></a>
     <div class="container mt-4">
-        <h2 class="mb-4 text-center">Listado de Equipos</h2>
+        <h2 class="mb-4 text-center"><b>Listado de Equipos</b></h2>
         <button id="reload" class="btn btn-info mb-3">Recargar</button>
 
         <table class="table table-striped table-hover">
             <thead class="table-dark">
                 <tr>
-                    <th>Número de Expediente</th>
-                    <th>Nombre del Equipo</th>
+                    <th><a href="?order_by=nexp&order_dir=<?= $new_order_dir ?>" class="text-light">Número de Expediente</a></th>
+                    <th><a href="?order_by=pcname&order_dir=<?= $new_order_dir ?>" class="text-light">Nombre del Equipo</a></th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -83,11 +196,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <input type="hidden" name="nexp" value="<?= htmlspecialchars($equipo['nexp'] ?? '') ?>">
 
                                     <!-- Campos del formulario con clases de Bootstrap -->
-                                    <div class="mb-3">
-                                        <label for="nexp" class="form-label">Nº Exp:</label>
-                                        <input type="number" class="form-control" name="nexp" value="<?= htmlspecialchars($equipo['nexp'] ?? '') ?>" required readonly>
-                                    </div>
-
                                     <div class="mb-3">
                                         <label for="model" class="form-label">Modelo:</label>
                                         <input type="text" class="form-control" name="model" value="<?= htmlspecialchars($equipo['model'] ?? '') ?>">
@@ -134,7 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="pcname" class="form-label">Nombre del equipo:</label>
+                                        <label for="pcname" class="form-label">Nombre del Equipo:</label>
                                         <input type="text" class="form-control" name="pcname" value="<?= htmlspecialchars($equipo['pcname'] ?? '') ?>">
                                     </div>
 
@@ -143,11 +251,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <input type="text" class="form-control" name="netuser" value="<?= htmlspecialchars($equipo['netuser'] ?? '') ?>">
                                     </div>
 
-                                    <!-- Botones de acción dentro del formulario -->
-                                    <div class="d-flex justify-content-end">
-                                        <button type="submit" name="updateComputer" class="btn btn-warning mt-3 me-2">Actualizar</button>
-                                        <button type="submit" name="deleteComputer" class="btn btn-danger mt-3">Eliminar</button>
-                                    </div>
+                                    <button type="submit" name="updateComputer" class="btn btn-warning">Actualizar equipo</button>
+                                    <button type="submit" name="deleteComputer" class="btn btn-danger">Eliminar equipo</button>
                                 </form>
                             </div>
                         </td>
@@ -157,16 +262,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </table>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const reload = document.getElementById("reload");
-
-        reload.addEventListener("click", (_) => {
-            // el _ es para indicar la ausencia de parametros
+        document.getElementById("reload").addEventListener("click", function() {
             location.reload();
         });
-    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        // Muestra el mensaje emergente después de una acción
+        <?php if ($message): ?>
+            const messageElement = document.getElementById("message");
+            messageElement.textContent = '<?= $message ?>';
+            messageElement.classList.remove("d-none");
+
+            // Después de 3 segundos, ocultamos el mensaje
+            setTimeout(function() {
+                messageElement.classList.add("d-none");
+            }, 3000);
+        <?php endif; ?>
+    </script>
 </body>
 
 </html>

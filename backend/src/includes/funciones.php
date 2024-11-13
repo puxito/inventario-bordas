@@ -4,9 +4,10 @@
 include('db.php');
 
 // Función para insertar un usuario
-function insertUser($username, $realname, $dept) {
+function insertUser($username, $realname, $dept)
+{
     global $conn;
-    
+
     try {
         $stmt = $conn->prepare("INSERT INTO users (username, realname, dept) VALUES (?, ?, ?)");
         if (!$stmt) {
@@ -14,13 +15,13 @@ function insertUser($username, $realname, $dept) {
         }
 
         $stmt->bind_param("sss", $username, $realname, $dept);
-        
+
         if (!$stmt->execute()) {
             throw new Exception("Error al insertar el usuario: " . $stmt->error);
         } else {
             echo "<p class='success'>Usuario insertado correctamente.</p>";
         }
-        
+
         $stmt->close();
     } catch (Exception $e) {
         echo "<p class='error'>" . $e->getMessage() . "</p>";
@@ -28,7 +29,8 @@ function insertUser($username, $realname, $dept) {
 }
 
 // Función para insertar un equipo
-function insertComputer($nexp, $model, $cpu, $ram, $motherboard, $storage, $so, $license, $ip, $mac, $pcname, $netuser) {
+function insertComputer($nexp, $model, $cpu, $ram, $motherboard, $storage, $so, $license, $ip, $mac, $pcname, $netuser)
+{
     global $conn;
 
     try {
@@ -44,13 +46,13 @@ function insertComputer($nexp, $model, $cpu, $ram, $motherboard, $storage, $so, 
         }
 
         $stmt->bind_param("issisissssss", $nexp, $model, $cpu, $ram, $motherboard, $storage, $so, $license, $ip, $mac, $pcname, $netuser);
-        
+
         if (!$stmt->execute()) {
             throw new Exception("Error al insertar el equipo: " . $stmt->error);
         } else {
             echo "<p class='success'>Equipo insertado correctamente.</p>";
         }
-        
+
         $stmt->close();
     } catch (Exception $e) {
         echo "<p class='error'>" . $e->getMessage() . "</p>";
@@ -58,7 +60,8 @@ function insertComputer($nexp, $model, $cpu, $ram, $motherboard, $storage, $so, 
 }
 
 // Función para obtener todos los usuarios
-function getUsers() {
+function getUsers()
+{
     global $conn;
     $users = [];
 
@@ -72,38 +75,39 @@ function getUsers() {
 }
 
 // Función para obtener todos los equipos, con opción de ordenarlos
-function getEquipos($orderBy = 'pcname') {
+function getEquipos($order_by = 'nexp', $order_dir = 'ASC')
+{
     global $conn;
     $equipos = [];
-    
-    $allowedColumns = ['pcname', 'nexp'];
-    if (!in_array($orderBy, $allowedColumns)) {
-        $orderBy = 'pcname'; // Orden por defecto
-    }
-    
-    $stmt = $conn->prepare("SELECT * FROM computers ORDER BY $orderBy ASC");
+
+    $allowedColumns = ['nexp', 'pcname'];
+    $order_by = in_array($order_by, $allowedColumns) ? $order_by : 'nexp';
+    $order_dir = strtoupper($order_dir) === 'DESC' ? 'DESC' : 'ASC';
+
+    $stmt = $conn->prepare("SELECT * FROM computers ORDER BY $order_by $order_dir");
     if (!$stmt) {
         throw new Exception("Error preparando la consulta: " . $conn->error);
     }
-    
+
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($result && $result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             $equipos[] = $row;
         }
     }
-    
+
     $stmt->close();
     return $equipos;
 }
 
 // Función para obtener los detalles de un solo equipo
-function getComputerDetails($nexp) {
+function getComputerDetails($nexp)
+{
     global $conn;
     $stmt = $conn->prepare("SELECT * FROM computers WHERE nexp = ?");
-    
+
     if (!$stmt) {
         throw new Exception("Error preparando la consulta: " . $conn->error);
     }
@@ -111,7 +115,7 @@ function getComputerDetails($nexp) {
     $stmt->bind_param("i", $nexp);
     $stmt->execute();
     $result = $stmt->get_result();
-    
+
     if ($result && $result->num_rows > 0) {
         return $result->fetch_assoc(); // Devuelve solo un equipo
     }
@@ -121,7 +125,8 @@ function getComputerDetails($nexp) {
 }
 
 // Función para actualizar un equipo
-function updateComputer($nexp, $model, $cpu, $ram, $motherboard, $storage, $so, $license, $ip, $mac, $pcname, $netuser) {
+function updateComputer($nexp, $model, $cpu, $ram, $motherboard, $storage, $so, $license, $ip, $mac, $pcname, $netuser)
+{
     global $conn;
 
     try {
@@ -137,7 +142,6 @@ function updateComputer($nexp, $model, $cpu, $ram, $motherboard, $storage, $so, 
         $updateFields = [];
         $params = [];
 
-        // Si el valor ha cambiado, lo preparamos para la actualización
         if ($model != $row['model']) {
             $updateFields[] = "model = ?";
             $params[] = $model;
@@ -183,35 +187,22 @@ function updateComputer($nexp, $model, $cpu, $ram, $motherboard, $storage, $so, 
             $params[] = $netuser;
         }
 
-        // Si se han encontrado campos modificados
         if (count($updateFields) > 0) {
-            // Construir la consulta de actualización dinámicamente
             $sql = "UPDATE computers SET " . implode(', ', $updateFields) . " WHERE nexp = ?";
-            $params[] = $nexp; // Añadir el parámetro nexp al final
+            $params[] = $nexp;
 
-            // Preparamos la consulta
             $stmt = $conn->prepare($sql);
-            $types = str_repeat("s", count($params) - 1) . "i"; // Crear el tipo de datos adecuado
+            $types = str_repeat("s", count($params) - 1) . "i";
             $stmt->bind_param($types, ...$params);
-
-            // Ejecutar la consulta
-            if (!$stmt->execute()) {
-                throw new Exception("Error al actualizar el equipo: " . $stmt->error);
-            } else {
-                echo "<p class='success'>Equipo actualizado correctamente.</p>";
-            }
-            $stmt->close();
-        } else {
-            echo "<p>No se realizaron cambios.</p>";
         }
     } catch (Exception $e) {
         echo "<p class='error'>" . $e->getMessage() . "</p>";
     }
 }
 
-
 // Función para eliminar un equipo
-function deleteComputer($nexp) {
+function deleteComputer($nexp)
+{
     global $conn;
 
     try {
@@ -221,13 +212,6 @@ function deleteComputer($nexp) {
         }
 
         $stmt->bind_param("i", $nexp);
-        
-        if (!$stmt->execute()) {
-            throw new Exception("Error al eliminar el equipo: " . $stmt->error);
-        } else {
-            echo "<p class='success'>Equipo eliminado correctamente.</p>";
-        }
-        
         $stmt->close();
     } catch (Exception $e) {
         echo "<p class='error'>" . $e->getMessage() . "</p>";

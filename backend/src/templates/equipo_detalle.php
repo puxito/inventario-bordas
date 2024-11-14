@@ -5,7 +5,7 @@ include('../includes/funciones.php');
 
 // Obtener el 'nexp' de la URL
 $nexp = $_GET['nexp'] ?? null;
-$equipo = getEquipoByNexp($nexp);
+$equipo = getComputerDetails($nexp);
 $usuario = getUsuarioByNetuser($equipo['netuser'] ?? ''); // Obtener usuario por netuser
 
 // Si el equipo no existe o no se encuentra, redirigir a la página principal

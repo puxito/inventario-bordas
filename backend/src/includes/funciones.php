@@ -239,3 +239,26 @@ function deleteComputer($nexp)
         echo "<p class='error'>" . $e->getMessage() . "</p>";
     }
 }
+
+function insertUsersFromCSV($filePath) {
+    global $conn;
+
+    if (($handle = fopen($filePath, "r")) !== false) {
+        while (($data = fgetcsv($handle, 1000, ";")) !== false) {
+            // Verifica que el CSV tenga al menos tres columnas
+            if (count($data) < 3) {
+                continue;
+            }
+
+            $username = trim($data[0], "'");
+            $realname = trim($data[1], "'");
+            $dept = trim($data[2], "'");
+
+            // Inserta el usuario en la base de datos
+            $stmt = $conn->prepare("INSERT INTO users (username, realname, dept) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $username, $realname, $dept);
+            $stmt->execute();
+        }
+        fclose($handle);
+    }
+}

@@ -27,6 +27,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['insertComputer'])) {
 
     insertComputer($nexp, $model, $cpu, $ram, $motherboard, $storage, $so, $license, $ip, $mac, $pcname, $netuser);
 }
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['uploadCSV'])) {
+    if (isset($_FILES['csv_file']) && $_FILES['csv_file']['error'] === UPLOAD_ERR_OK) {
+        $csvFilePath = $_FILES['csv_file']['tmp_name'];
+        
+        // Llama a la función para insertar usuarios desde el archivo CSV
+        insertUsersFromCSV($csvFilePath);
+        
+        // Mensaje de confirmación
+        $message = "Usuarios insertados desde el archivo CSV exitosamente.";
+    } else {
+        $message = "Error al cargar el archivo CSV.";
+    }
+}
 
 // Obtener la lista de usuarios para el desplegable
 $users = getUsers();
@@ -131,7 +144,7 @@ $users = getUsers();
 <body>
     <!-- Logo flotante en la esquina -->
     <a href="../index.php"><img src="../uploads/logo-bordas-FINAL-esp-color - copia.jpg" alt="Logo de la empresa" class="logo"></a>
-        
+
     <div class="container">
 
         <!-- Formulario para insertar un usuario -->
@@ -152,6 +165,13 @@ $users = getUsers();
             </select>
 
             <button type="submit" name="insertUser">Insertar Usuario</button>
+        </form>
+        <h2><b>Insertar Usuarios desde CSV</b></h2>
+        <form method="POST" class="form-container" enctype="multipart/form-data">
+            <label for="csv_file">Selecciona un archivo CSV:</label>
+            <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
+
+            <button type="submit" name="uploadCSV">Insertar Usuarios desde CSV</button>
         </form>
 
         <!-- Formulario para insertar un equipo -->

@@ -30,10 +30,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['insertComputer'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['uploadCSV'])) {
     if (isset($_FILES['csv_file']) && $_FILES['csv_file']['error'] === UPLOAD_ERR_OK) {
         $csvFilePath = $_FILES['csv_file']['tmp_name'];
-        
+
         // Llama a la función para insertar usuarios desde el archivo CSV
         insertUsersFromCSV($csvFilePath);
-        
+
         // Mensaje de confirmación
         $message = "Usuarios insertados desde el archivo CSV exitosamente.";
     } else {
@@ -115,14 +115,14 @@ $users = getUsers();
             outline: none;
         }
 
-
-
-
         .container {
             max-width: 900px;
             margin: 0 auto;
         }
 
+        .container button {
+            float: right;
+        }
         /* Estilo para el logo flotante en una esquina */
         .logo {
             position: fixed;
@@ -146,6 +146,8 @@ $users = getUsers();
     <a href="../index.php"><img src="../uploads/logo-bordas-FINAL-esp-color - copia.jpg" alt="Logo de la empresa" class="logo"></a>
 
     <div class="container">
+        <!-- Botón para recargar la página -->
+        <button id="reload" class="btn btn-primary">Recargar</button>
 
         <!-- Formulario para insertar un usuario -->
         <h2><b>Insertar Usuario</b></h2>
@@ -227,15 +229,15 @@ $users = getUsers();
         </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz4fnFO9gybBogGzC7GoouOY1D9HfqF5zsXY1wA03GzHN3k5/u6pD6L6L3" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Wn1qWmQNAhD2F3cZ1IRamPpBJoA7Ai1sgFHSk0HsPq4s5p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     <script>
         document.getElementById("reload").addEventListener("click", function() {
             location.reload();
         });
 
         // Muestra el mensaje emergente después de una acción
-        <?php if ($message): ?>
+        <?php if (isset($message)): ?>
             const messageElement = document.getElementById("message");
             messageElement.textContent = '<?= $message ?>';
             messageElement.classList.remove("d-none");

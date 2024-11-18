@@ -127,35 +127,55 @@ if (!$equipo) {
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Función para exportar el contenido a PDF
-        function generarPDF() {
-            const contenido = document.getElementById('contenidoPDF');
+    // Función para exportar el contenido a PDF
+    function generarPDF() {
+        const contenido = document.getElementById('contenidoPDF').cloneNode(true); // Clonar el contenido original
 
-            const nexp = document.getElementById('nexp').value;
-            const pcname = document.getElementById('pcname').value;
+        // Obtener datos dinámicos
+        const nexp = document.getElementById('nexp').value;
+        const pcname = document.getElementById('pcname').value;
 
-            const filename = `${nexp}-${pcname}.pdf`;
-            html2pdf()
-                .set({
-                    margin: 0.1,
-                    filename: filename,
-                    image: {
-                        type: 'jpeg',
-                        quality: 0.98
-                    },
-                    html2canvas: {
-                        scale: 0.7
-                    },
-                    jsPDF: {
-                        unit: 'in',
-                        format: 'a4',
-                        orientation: 'portrait'
-                    }
-                })
-                .from(contenido)
-                .save();
-        }
-    </script>
+        // Crear un subtítulo dinámico
+        const subtitulo = document.createElement('h4');
+        subtitulo.textContent = `Nº Expediente: ${nexp}`;
+        subtitulo.style.textAlign = 'center';
+        subtitulo.style.marginBottom = '20px';
+        subtitulo.classList.add('solo-pdf'); // Clase para controlar su visibilidad
+
+        // Insertar el subtítulo al inicio del contenido clonado
+        contenido.insertBefore(subtitulo, contenido.firstChild);
+
+        // Añadir estilos para que la clase "solo-pdf" no se muestre en la vista web
+        const estiloSoloPDF = document.createElement('style');
+        estiloSoloPDF.textContent = `
+            .solo-pdf { display: block; }
+        `;
+        contenido.appendChild(estiloSoloPDF);
+
+        // Configurar el nombre del archivo
+        const filename = `${nexp}-${pcname}.pdf`;
+
+        // Configuración y generación del PDF
+        html2pdf()
+            .set({
+                margin: 0,
+                filename: filename,
+                image: {
+                    type: 'jpeg',
+                    quality: 1
+                },
+                html2canvas: {
+                    scale: 0.6
+                },
+                jsPDF: {
+                    unit: 'in',
+                    format: 'a4',
+                    orientation: 'portrait'
+                }
+            })
+            .from(contenido)
+            .save();
+    }
+</script>
 </body>
-
 </html>

@@ -188,13 +188,13 @@ $users = getUsers();
             <label for="cpu">CPU:</label>
             <input type="text" id="cpu" name="cpu" required>
 
-            <label for="ram">RAM:</label>
+            <label for="ram">RAM (MB):</label>
             <input type="number" id="ram" name="ram" required>
 
             <label for="motherboard">Motherboard:</label>
             <input type="text" id="motherboard" name="motherboard" required>
 
-            <label for="storage">Storage:</label>
+            <label for="storage">Storage (GB):</label>
             <input type="number" id="storage" name="storage" required>
 
             <label for="so">Operating System:</label>

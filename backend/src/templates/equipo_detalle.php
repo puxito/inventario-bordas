@@ -49,12 +49,11 @@ if (!$equipo) {
 </style>
 
 <body>
-    <a href="../index.php"><img src="../uploads/logo-bordas-FINAL-esp-color - copia.jpg" alt="Logo de la empresa" class="logo"></a>
     <div class="container mt-4">
-        <a href="equipo_crud.php" class="btn btn-secondary mb-3 float-end">Volver al listado</a>
-        <button onclick="generarPDF()" class="btn btn-primary mb-3">Exportar a PDF</button>
+
         <div class="container mt-4" id="contenidoPDF">
             <h2 class="mb-4 text-center"><b>Detalles del Equipo: <?= htmlspecialchars($equipo['pcname'] ?? '') ?></b></h2>
+            <h3 class="mb-4 text-center"><b>Número de Expediente: <?= htmlspecialchars(string: $equipo['nexp'] ?? '') ?></b></h3>
             <br>
             <div class="row">
                 <!-- Columna para información del equipo -->
@@ -124,58 +123,61 @@ if (!$equipo) {
                 </div>
             </div>
         </div>
+        <button onclick="generarPDF()" class="btn btn-primary mb-3 float-end">Exportar a PDF</button>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
     <script>
-    // Función para exportar el contenido a PDF
-    function generarPDF() {
-        const contenido = document.getElementById('contenidoPDF').cloneNode(true); // Clonar el contenido original
+        // Función para exportar el contenido a PDF
+        function generarPDF() {
+            const contenido = document.getElementById('contenidoPDF').cloneNode(true); // Clonar el contenido original
 
-        // Obtener datos dinámicos
-        const nexp = document.getElementById('nexp').value;
-        const pcname = document.getElementById('pcname').value;
+            // Obtener datos dinámicos
+            const nexp = document.getElementById('nexp').value;
+            const pcname = document.getElementById('pcname').value;
 
-        // Crear un subtítulo dinámico
-        const subtitulo = document.createElement('h4');
-        subtitulo.textContent = `Nº Expediente: ${nexp}`;
-        subtitulo.style.textAlign = 'center';
-        subtitulo.style.marginBottom = '20px';
-        subtitulo.classList.add('solo-pdf'); // Clase para controlar su visibilidad
+            // Crear un subtítulo dinámico
+            const subtitulo = document.createElement('h4');
+            subtitulo.textContent = `Nº Expediente: ${nexp}`;
+            subtitulo.style.textAlign = 'center';
+            subtitulo.style.marginBottom = '20px';
+            subtitulo.classList.add('solo-pdf'); // Clase para controlar su visibilidad
 
-        // Insertar el subtítulo al inicio del contenido clonado
-        contenido.insertBefore(subtitulo, contenido.firstChild);
+            // Insertar el subtítulo al inicio del contenido clonado
+            contenido.insertBefore(subtitulo, contenido.firstChild);
 
-        // Añadir estilos para que la clase "solo-pdf" no se muestre en la vista web
-        const estiloSoloPDF = document.createElement('style');
-        estiloSoloPDF.textContent = `
+            // Añadir estilos para que la clase "solo-pdf" no se muestre en la vista web
+            const estiloSoloPDF = document.createElement('style');
+            estiloSoloPDF.textContent = `
             .solo-pdf { display: block; }
         `;
-        contenido.appendChild(estiloSoloPDF);
+            contenido.appendChild(estiloSoloPDF);
 
-        // Configurar el nombre del archivo
-        const filename = `${nexp}-${pcname}.pdf`;
+            // Configurar el nombre del archivo
+            const filename = `${nexp}-${pcname}.pdf`;
 
-        // Configuración y generación del PDF
-        html2pdf()
-            .set({
-                margin: 0,
-                filename: filename,
-                image: {
-                    type: 'jpeg',
-                    quality: 1
-                },
-                html2canvas: {
-                    scale: 0.6
-                },
-                jsPDF: {
-                    unit: 'in',
-                    format: 'a4',
-                    orientation: 'portrait'
-                }
-            })
-            .from(contenido)
-            .save();
-    }
-</script>
+            // Configuración y generación del PDF
+            html2pdf()
+                .set({
+                    margin: 0,
+                    filename: filename,
+                    image: {
+                        type: 'jpeg',
+                        quality: 1
+                    },
+                    html2canvas: {
+                        scale: 0.6
+                    },
+                    jsPDF: {
+                        unit: 'in',
+                        format: 'a4',
+                        orientation: 'portrait'
+                    }
+                })
+                .from(contenido)
+                .save();
+        }
+    </script>
 </body>
+
 </html>

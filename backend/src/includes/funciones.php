@@ -63,32 +63,57 @@ function getUsers()
 }
 
 // Función para obtener todos los equipos, con opción de ordenarlos
-function getEquipos($order_by = 'nexp', $order_dir = 'ASC')
+function getEquipos($order_by = 'nexp', $order_dir = 'ASC', $search = '')
 {
     global $conn;
     $equipos = [];
 
+    // Definimos las columnas permitidas para el orden
     $allowedColumns = ['nexp', 'pcname'];
     $order_by = in_array($order_by, $allowedColumns) ? $order_by : 'nexp';
     $order_dir = strtoupper($order_dir) === 'DESC' ? 'DESC' : 'ASC';
 
-    $stmt = $conn->prepare("SELECT * FROM computers ORDER BY $order_by $order_dir");
+    // Creamos la consulta base
+    $sql = "SELECT * FROM computers WHERE 1";
+
+    // Si hay un término de búsqueda, lo agregamos a la consulta
+    if ($search) {
+        $search = '%' . $search . '%';  // Preparamos el término de búsqueda con wildcards
+        $sql .= " AND (nexp LIKE ? OR pcname LIKE ?)";
+    }
+
+    // Añadimos la parte de ordenación a la consulta
+    $sql .= " ORDER BY $order_by $order_dir";
+
+    // Preparamos la declaración
+    $stmt = $conn->prepare($sql);
+
     if (!$stmt) {
         throw new Exception("Error preparando la consulta: " . $conn->error);
     }
 
+    // Si hay un término de búsqueda, vinculamos los parámetros
+    if ($search) {
+        $stmt->bind_param('ss', $search, $search);
+    }
+
+    // Ejecutamos la consulta
     $stmt->execute();
     $result = $stmt->get_result();
 
+    // Si hay resultados, los añadimos al array
     if ($result && $result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             $equipos[] = $row;
         }
     }
 
+    // Cerramos la declaración
     $stmt->close();
+
     return $equipos;
 }
+
 
 // Función para obtener los detalles de un solo equipo
 function getComputerDetails($nexp)

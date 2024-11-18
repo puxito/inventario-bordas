@@ -6,13 +6,15 @@ include('../includes/funciones.php');
 // Ordenación
 $order_by = $_GET['order_by'] ?? 'nexp';
 $order_dir = $_GET['order_dir'] ?? 'asc';
-$equipos = getEquipos($order_by, $order_dir);
+
+// Buscar
+$search = $_GET['search'] ?? '';  // Obtener la búsqueda del formulario
+$equipos = getEquipos($order_by, $order_dir, $search);  // Obtener los equipos según los parámetros
+
 $new_order_dir = $order_dir === 'asc' ? 'desc' : 'asc';
 
 // Mensaje de retroalimentación
-
-
-// Si se envía el formulario de actualización
+$message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['updateComputer'])) {
         updateComputer(
@@ -31,11 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         );
         $message = 'Equipo actualizado correctamente.';
     } elseif (isset($_POST['deleteComputer'])) {
-        deleteComputer($_POST['nexp']); // Usamos nexp como identificador
+        deleteComputer($_POST['nexp']); 
         $message = 'Equipo eliminado correctamente.';
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -129,6 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         @media (max-width: 768px) {
             .logo {
                 width: 80px;
+                position: relative;
             }
 
             .container {
@@ -170,6 +172,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="../index.php"><img src="../uploads/logo-bordas-FINAL-esp-color - copia.jpg" alt="Logo de la empresa" class="logo"></a>
     <div class="container mt-4">
         <h2 class="mb-4 text-center"><b>Listado de Equipos</b></h2>
+        <form method="GET" class="mb-3">
+            <div class="input-group">
+                <input type="text" class="form-control" name="search" placeholder="Buscar por número de expediente o nombre de equipo" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+                <button class="btn btn-info" type="submit">Buscar</button>
+            </div>
+        </form>
         <button id="reload" class="btn btn-info mb-3">Recargar</button>
 
         <table class="table table-striped table-hover">
@@ -256,12 +264,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="netuser" class="form-label">Usuario de red:</label>
+                                        <label for="netuser" class="form-label">Usuario de la Red:</label>
                                         <input type="text" class="form-control" name="netuser" value="<?= htmlspecialchars($equipo['netuser'] ?? '') ?>">
                                     </div>
 
-                                    <button type="submit" name="updateComputer" class="btn btn-warning">Actualizar equipo</button>
-                                    <button type="submit" name="deleteComputer" class="btn btn-danger">Eliminar equipo</button>
+                                    <button type="submit" name="updateComputer" class="btn btn-warning">Actualizar</button>
+                                    <button type="submit" name="deleteComputer" class="btn btn-danger">Eliminar</button>
                                 </form>
                             </div>
                         </td>
@@ -271,23 +279,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </table>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     <script>
-        document.getElementById("reload").addEventListener("click", function() {
-            location.reload();
-        });
-
-        // Muestra el mensaje emergente después de una acción
-        <?php if ($message): ?>
-            const messageElement = document.getElementById("message");
-            messageElement.textContent = '<?= $message ?>';
-            messageElement.classList.remove("d-none");
-
-            // Después de 3 segundos, ocultamos el mensaje
-            setTimeout(function() {
-                messageElement.classList.add("d-none");
+        
+        if ('<?= $message ?>' !== '') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = '<?= $message ?>';
+            messageDiv.classList.remove('d-none');
+            setTimeout(() => {
+                messageDiv.classList.add('d-none');
             }, 3000);
-        <?php endif; ?>
+        }
     </script>
 </body>
 
